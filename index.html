@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BagAway — Location de Bagages Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,400;0,9..144,600;1,9..144,200;1,9..144,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<!-- ============================================================
+     BANNIÈRE DE PROMOTION (statique)
+     ============================================================ -->
+<div class="site-promo-banner" role="banner">
+  🔥 Offre de lancement&nbsp;: <strong>-10%</strong> sur votre première location avec le code
+  <button class="site-promo-code" onclick="copyPromoCode()" title="Cliquer pour copier le code">BAGAWAY10&ensp;⧉</button>
+</div>
+
+<!-- ============================================================
+     MAIN PAGE WRAPPER
+     ============================================================ -->
+<div id="main-page">
+
+<!-- ============================================================
+     MODAL DE CONNEXION / INSCRIPTION
+     ============================================================ -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Connexion BagAway">
+  <div class="modal-backdrop" onclick="closeModal()"></div>
+
+  <div class="modal-card" id="modalCard">
+    <button class="modal-close" onclick="closeModal()" aria-label="Fermer">✕</button>
+
+    <!-- Logo -->
+    <div class="modal-logo">
+      <div class="modal-logo-mark">B</div>
+      <span class="modal-logo-text">BagAway</span>
+    </div>
+
+    <!-- Title -->
+    <h2 class="modal-title" id="modalTitle">Bon retour<br>parmi nous <em>✦</em></h2>
+    <p class="modal-subtitle" id="modalSubtitle">Connectez-vous pour accéder à vos réservations.</p>
+
+    <!-- Tabs -->
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabLogin"    onclick="switchTab('login')">Se connecter</button>
+      <button class="modal-tab"        id="tabRegister" onclick="switchTab('register')">Créer un compte</button>
+    </div>
+
+    <!-- Form — envoi vers Formspree -->
+    <form id="modalForm" novalidate>
+      <!-- Champ nom (inscription seulement) -->
+      <div class="modal-field field-register" id="fieldName">
+        <label class="modal-label" for="inputName">👤 Prénom &amp; Nom</label>
+        <input class="modal-input" type="text" id="inputName" name="name" placeholder="Marie Dupont" autocomplete="name">
+      </div>
+
+      <!-- Email -->
+      <div class="modal-field">
+        <label class="modal-label" for="inputEmail">📧 Adresse e-mail</label>
+        <input class="modal-input" type="email" id="inputEmail" name="email" placeholder="vous@email.com" autocomplete="email" required>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="modal-field">
+        <label class="modal-label" for="inputPassword">🔑 Mot de passe</label>
+        <div class="modal-pw-wrap">
+          <input class="modal-input" type="password" id="inputPassword" name="password" placeholder="••••••••" autocomplete="current-password" required style="padding-right: 44px;">
+          <button type="button" class="modal-pw-toggle" onclick="togglePw()" aria-label="Afficher le mot de passe" id="pwToggle">👁️</button>
+        </div>
+      </div>
+
+      <!-- Confirmer mdp (inscription) -->
+      <div class="modal-field field-register" id="fieldConfirm">
+        <label class="modal-label" for="inputConfirm">🔑 Confirmer le mot de passe</label>
+        <div class="modal-pw-wrap">
+          <input class="modal-input" type="password" id="inputConfirm" name="password_confirm" placeholder="••••••••" style="padding-right: 44px;">
+        </div>
+      </div>
+
+      <!-- Options (connexion seulement) -->
+      <div class="modal-options" id="loginOptions">
+        <label class="modal-check-label">
+          <input type="checkbox" class="modal-check" name="remember" value="oui">
+          Se souvenir de moi
+        </label>
+        <a href="#" class="modal-forgot">Mot de passe oublié ?</a>
+      </div>
+
+      <!-- Champ caché : type d'action -->
+      <input type="hidden" name="_action" id="hiddenAction" value="connexion">
+      <!-- Formspree : sujet email dynamique -->
+      <input type="hidden" name="_subject" id="hiddenSubject" value="🔑 Nouvelle connexion BagAway">
+      <!-- Désactiver la redirection Formspree (réponse JSON) -->
+      <input type="hidden" name="_format" value="plain">
+
+      <button type="submit" class="modal-submit" id="modalSubmit">
+        Se connecter
+      </button>
+    </form>
+
+    <!-- Divider + OAuth -->
+    <div class="modal-divider">ou continuer avec</div>
+    <div class="modal-oauth">
+      <button class="btn-oauth" onclick="oauthNotice()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Google
+      </button>
+      <button class="btn-oauth" onclick="oauthNotice()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Facebook
+      </button>
+    </div>
+
+    <p class="modal-footer-txt" id="modalFooterTxt">
+      Pas encore de compte ? <a href="#" onclick="switchTab('register'); return false;">Créer un compte gratuit</a>
+    </p>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="modal-toast" id="modalToast">
+  <span class="toast-icon" id="toastIcon">✓</span>
+  <span id="toastMsg">Message envoyé</span>
+</div>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <div class="nav-logo-mark">B</div>
+    BagAway
+  </div>
+  <ul class="nav-links">
+    <li><a href="#catalog">Catalogue</a></li>
+    <li><a href="#how">Comment ça marche</a></li>
+    <li><a href="#features">Avantages</a></li>
+    <li><a href="#avis">Avis</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Passer en mode sombre">🌙</button>
+    <button class="btn-ghost" onclick="openModal()">Se connecter</button>
+    <button class="btn-gold" onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})">Réserver</button>
+    <button class="nav-burger" id="navBurger" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Menu mobile -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#catalog" onclick="closeMobileMenu()">Catalogue</a>
+  <a href="#how" onclick="closeMobileMenu()">Comment ça marche</a>
+  <a href="#features" onclick="closeMobileMenu()">Avantages</a>
+  <a href="#avis" onclick="closeMobileMenu()">Avis</a>
+  <a href="#faq" onclick="closeMobileMenu()">FAQ</a>
+  <a href="#" onclick="closeMobileMenu(); openModal(); return false;">Se connecter</a>
+  <a class="mm-cta" href="#catalog" onclick="closeMobileMenu()">Réserver maintenant</a>
+</div>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-lines"></div>
+
+  <div class="hero-left">
+    <p class="hero-eyebrow">Location de bagages premium</p>
+    <h1 class="hero-headline">
+    Voyagez <em>léger,</em><br>
+      explorez libre
+    </h1>
+    <p class="hero-sub">
+      Louez des valises et sacs de qualité supérieure, livrés à votre hôtel ou récupérés en agence. Simple, rapide, sans contrainte.
+    </p>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num">15k+</div>
+        <div class="hero-stat-label">Clients satisfaits</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">48h</div>
+        <div class="hero-stat-label">Livraison express</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">4.9★</div>
+        <div class="hero-stat-label">Note moyenne</div>
+      </div>
+    </div>
+
+    <div class="hero-ctas" style="display:flex;gap:14px;margin-top:44px;opacity:0;animation:fadeUp 0.9s var(--ease) 0.8s forwards;">
+      <button onclick="document.getElementById('catalog').scrollIntoView({behavior:'smooth'})" style="padding:16px 36px;background:var(--navy);color:#fff;border-radius:var(--r-sm);font-family:var(--font-body);font-size:0.88rem;font-weight:500;letter-spacing:0.04em;transition:all 0.3s var(--ease);border:none;cursor:pointer;" onmouseover="this.style.background='var(--navy-lt)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 32px rgba(27,43,75,0.25)'" onmouseout="this.style.background='var(--navy)';this.style.transform='none';this.style.boxShadow='none'">Voir les bagages</button>
+      <button onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})" style="padding:16px 36px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--font-body);font-size:0.88rem;font-weight:400;letter-spacing:0.04em;transition:all 0.2s;cursor:pointer;" onmouseover="this.style.borderColor='var(--navy)';this.style.color='var(--navy)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Comment ça marche</button>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span class="scroll-hint-text"></span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     HOW IT WORKS
+     ============================================================ -->
+<section class="section" id="how">
+  <div class="reveal">
+    <p class="section-tag">Simple & rapide</p>
+    <h2 class="section-title">Comment ça marche <em>vraiment</em></h2>
+  </div>
+
+  <div class="steps-grid">
+    <div class="step-card reveal reveal-delay-1">
+      <div class="step-num">01</div>
+      <div class="step-icon">🔍</div>
+      <h3 class="step-title">Choisissez votre bagage</h3>
+      <p class="step-desc">Cabine, grande valise, sac à dos… filtrez par taille, style ou destination. Chaque produit est photographié et décrit avec précision.</p>
+    </div>
+    <div class="step-card reveal reveal-delay-2">
+      <div class="step-num">02</div>
+      <div class="step-icon">📅</div>
+      <h3 class="step-title">Définissez vos dates</h3>
+      <p class="step-desc">Sélectionnez la durée de location dès 1 jour jusqu'à plusieurs mois. Le tarif s'affiche instantanément, sans surprise.</p>
+    </div>
+    <div class="step-card reveal reveal-delay-3">
+      <div class="step-num">03</div>
+      <div class="step-icon">🚀</div>
+      <h3 class="step-title">Recevez ou récupérez</h3>
+      <p class="step-desc">Livraison à domicile, à l'hôtel ou retrait en agence. Votre bagage arrive propre, désinfecté et prêt à l'emploi.</p>
+    </div>
+    <div class="step-card reveal reveal-delay-4">
+      <div class="step-num">04</div>
+      <div class="step-icon">↩️</div>
+      <h3 class="step-title">Retournez sans stress</h3>
+      <p class="step-desc">On vient le récupérer chez vous ou en point relais. Aucun frais cachés, aucune mauvaise surprise. Voyage terminé !</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CATALOG
+     ============================================================ -->
+<section class="section catalog-section" id="catalog">
+  <div class="catalog-header reveal">
+    <div>
+      <p class="section-tag">Notre sélection</p>
+      <h2 class="section-title" style="font-size: clamp(2rem, 3vw, 2.8rem);">Bagages <em>premium</em></h2>
+    </div>
+    <div class="filter-pills">
+      <button class="pill active" type="button" data-filter="tout" aria-pressed="true">Tout</button>
+      <button class="pill" type="button" data-filter="cabine" aria-pressed="false">Cabine</button>
+      <button class="pill" type="button" data-filter="valises" aria-pressed="false">Valises</button>
+      <button class="pill" type="button" data-filter="sacs" aria-pressed="false">Sacs</button>
+      <button class="pill" type="button" data-filter="business" aria-pressed="false">Business</button>
+    </div>
+  </div>
+
+  <div class="products-grid">
+    <div class="product-card reveal reveal-delay-1" data-category="cabine valises" style="cursor:pointer" onclick="openProduct('cabin')">
+      <div class="product-img" style="padding:0; overflow:hidden; background:#f5f5f5;">
+        <img src="assets/images/bagaway-01-6b0d3b3c5b.jpg" alt="Valise Cabine Élite" style="width:100%;height:100%;object-fit:cover;">
+        <div class="product-badge">⭐ Bestseller</div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Valise Cabine Élite</h3>
+        <div class="product-specs">
+          <span class="spec">📦 20 litres</span>
+          <span class="spec">⚖️ 2.1 kg</span>
+          <span class="spec">✈️ Conforme IATA</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price">
+            <div class="price-num">7€</div>
+            <div class="price-unit">/ jour</div>
+          </div>
+          <button class="btn-add" onclick="event.stopPropagation(); openProduct('cabin')">Réserver</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-delay-2" data-category="business" style="cursor:pointer" onclick="openProduct('trolley')">
+      <div class="product-img" style="padding:0; overflow:hidden; background:#f0f0f0;">
+        <img src="assets/images/bagaway-02-1222c96d65.jpg" alt="Trolley Business Pro" style="width:100%;height:100%;object-fit:cover;">
+        <div class="product-badge" style="background: #e8c97e;">Business</div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Trolley Business Pro</h3>
+        <div class="product-specs">
+          <span class="spec">📦 38 litres</span>
+          <span class="spec">⚖️ 3.2 kg</span>
+          <span class="spec">🔒 TSA Lock</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price">
+            <div class="price-num">5€</div>
+            <div class="price-unit">/ jour</div>
+          </div>
+          <button class="btn-add" onclick="event.stopPropagation(); openProduct('trolley')">Réserver</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-delay-3" data-category="sacs" style="cursor:pointer" onclick="openProduct('backpack')">
+      <div class="product-img" style="padding:0; overflow:hidden; background:#f5f5f5;">
+        <img src="assets/images/bagaway-03-7b8d6a2fdd.jpg" alt="Sac à dos Explorer" style="width:100%;height:100%;object-fit:cover;">
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Sac à dos Explorer</h3>
+        <div class="product-specs">
+          <span class="spec">📦 30 litres</span>
+          <span class="spec">⚖️ 1.4 kg</span>
+          <span class="spec">💧 Waterproof</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price">
+            <div class="price-num">2€</div>
+            <div class="price-unit">/ jour</div>
+          </div>
+          <button class="btn-add" onclick="event.stopPropagation(); openProduct('backpack')">Réserver</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-delay-1" data-category="valises" style="cursor:pointer" onclick="openProduct('large')">
+      <div class="product-img" style="padding:0; overflow:hidden; background:#fff9f0;">
+        <img src="assets/images/bagaway-04-aacfa371ef.jpg" alt="Grande Valise Family" style="width:100%;height:100%;object-fit:contain;padding:12px;">
+        <div class="product-badge" style="background: #b8a0d4; color: #111;">Nouveau</div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Grande Valise Family</h3>
+        <div class="product-specs">
+          <span class="spec">📦 75 litres</span>
+          <span class="spec">⚖️ 4.1 kg</span>
+          <span class="spec">🎨 4 coloris</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price">
+            <div class="price-num">11€</div>
+            <div class="price-unit">/ jour</div>
+          </div>
+          <button class="btn-add" onclick="event.stopPropagation(); openProduct('large')">Réserver</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-delay-2" data-category="sacs" style="cursor:pointer" onclick="openProduct('weekend')">
+      <div class="product-img" style="padding:0; overflow:hidden; background:#f0f0f0;">
+        <img src="assets/images/bagaway-05-03fa8c3462.jpg" alt="Sac Week-end Cuir" style="width:100%;height:100%;object-fit:contain;padding:12px;">
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Sac Week-end Cuir</h3>
+        <div class="product-specs">
+          <span class="spec">📦 45 litres</span>
+          <span class="spec">⚖️ 1.8 kg</span>
+          <span class="spec">🪄 Cuir végétal</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price">
+            <div class="price-num">16€</div>
+            <div class="price-unit">/ jour</div>
+          </div>
+          <button class="btn-add" onclick="event.stopPropagation(); openProduct('weekend')">Réserver</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-delay-3" data-category="cabine valises" style="background: linear-gradient(135deg, var(--card), rgba(201,168,76,0.05)); border-color: rgba(201,168,76,0.15); cursor:pointer" onclick="openProduct('pack')">
+      <div class="product-img" style="padding:0; overflow:hidden; background:#f5f1eb;">
+        <img src="assets/images/bagaway-06-bdfdc1787b.jpg" alt="Pack Voyage Complet : valise, sac à dos et sac week-end" style="width:100%;height:100%;object-fit:contain;padding:12px;">
+        <div class="product-badge">Pack complet</div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">Pack Voyage Complet</h3>
+        <div class="product-specs">
+          <span class="spec">📦 Cabine + grande</span>
+          <span class="spec">💰 -20%</span>
+        </div>
+        <div class="product-footer">
+          <div class="product-price">
+            <div class="price-num">19€</div>
+            <div class="price-unit">/ jour / set</div>
+          </div>
+          <button class="btn-add" onclick="event.stopPropagation(); openProduct('pack')">Voir le pack</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FEATURES BENTO
+     ============================================================ -->
+<section class="section" id="features">
+  <div class="reveal">
+    <p class="section-tag">Nos avantages</p>
+    <h2 class="section-title">Tout pensé pour <em>votre confort</em></h2>
+  </div>
+
+  <div class="bento-grid">
+    <div class="bento-card bento-1 reveal">
+      <div class="bento-counter" id="counter-clients">0</div>
+      <div class="bento-counter-label">clients heureux</div>
+      <h3 class="bento-card-title" style="margin-top: 24px;">Une communauté qui nous fait confiance</h3>
+      <p class="bento-card-desc" style="margin-top: 10px;">De Paris à Tokyo, des milliers de voyageurs choisissent BagAway pour voyager plus léger et plus libre.</p>
+    </div>
+
+    <div class="bento-card bento-2 reveal reveal-delay-1">
+      <div class="bento-icon">🛡️</div>
+      <h3 class="bento-card-title">Assurance incluse</h3>
+      <p class="bento-card-desc">Chaque bagage est couvert jusqu'à 500€ en cas de perte ou de dommage. Zéro stress.</p>
+    </div>
+
+    <div class="bento-card bento-3 reveal reveal-delay-2">
+      <div class="stars">★★★★★</div>
+      <div class="rating-num">4.9</div>
+      <p class="bento-card-desc" style="margin-top: 4px;">Note moyenne sur +2 000 avis vérifiés</p>
+    </div>
+
+    <div class="bento-card bento-4 reveal reveal-delay-1">
+      <div class="bento-icon">♻️</div>
+      <h3 class="bento-card-title">Engagement durable</h3>
+      <p class="bento-card-desc">Louer plutôt qu'acheter, c'est réduire son empreinte carbone. Pour chaque location, nous plantons un arbre.</p>
+    </div>
+
+    <div class="bento-card bento-5 reveal reveal-delay-2">
+      <div class="bento-icon">🗺️</div>
+      <h3 class="bento-card-title">Partout en France</h3>
+      <p class="bento-card-desc">Réseau de 120+ points de retrait et livraison à domicile dans toutes les grandes villes.</p>
+      <div class="map-visual">
+        <div class="map-dot"></div>
+      </div>
+    </div>
+
+    <div class="bento-card bento-6 reveal reveal-delay-3">
+      <div class="bento-icon">⚡</div>
+      <h3 class="bento-card-title">Livraison express 4h</h3>
+      <p class="bento-card-desc">Commandez avant 14h, recevez dans l'après-midi dans les grandes villes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TESTIMONIALS
+     ============================================================ -->
+<section class="section testimonials-section" id="avis" style="padding-bottom: 0;">
+  <div class="reveal">
+    <p class="section-tag">Témoignages</p>
+    <h2 class="section-title">Ce que disent nos <em>voyageurs</em></h2>
+  </div>
+
+  <div class="testimonials-track">
+    <!-- Set 1 -->
+    <div class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">« Un service absolument irréprochable. La valise était parfaite, livrée à l'heure à mon hôtel. Je ne voyagerai plus autrement ! »</p>
+      <div class="t-author">
+        <div class="t-avatar">SL</div>
+        <div>
+          <div class="t-name">Sophie L.</div>
+          <div class="t-meta">Paris → Barcelone • Août 2024</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">« Génial pour un voyage d'affaires improvisé. Commandé le soir, livré le lendemain matin. Le trolley était nickel, comme neuf. »</p>
+      <div class="t-author">
+        <div class="t-avatar">MA</div>
+        <div>
+          <div class="t-name">Marc A.</div>
+          <div class="t-meta">Lyon → Amsterdam • Oct 2024</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">« J'ai loué pour toute la famille. 3 valises livrées sans accroc. Le prix est imbattable comparé à l'achat. BagAway, c'est malin ! »</p>
+      <div class="t-author">
+        <div class="t-avatar">CF</div>
+        <div>
+          <div class="t-name">Claire F.</div>
+          <div class="t-meta">Marseille → Réunion • Été 2024</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="t-stars">★★★★☆</div>
+      <p class="t-text">« Super concept, site clair et intuitif. La livraison avait 30 min de retard mais l'équipe a été très réactive. Je recommande. »</p>
+      <div class="t-author">
+        <div class="t-avatar">TR</div>
+        <div>
+          <div class="t-name">Thomas R.</div>
+          <div class="t-meta">Bordeaux → Berlin • Nov 2024</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">« En tant que digital nomad, c'est la solution rêvée. Je loue selon mes destinations. Fini le stockage de valises chez moi ! »</p>
+      <div class="t-author">
+        <div class="t-avatar">AK</div>
+        <div>
+          <div class="t-name">Amélie K.</div>
+          <div class="t-meta">Remote traveler • Fidèle depuis 2023</div>
+        </div>
+      </div>
+    </div>
+    <!-- Duplicate for infinite marquee -->
+    <div class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">« Un service absolument irréprochable. La valise était parfaite, livrée à l'heure à mon hôtel. Je ne voyagerai plus autrement ! »</p>
+      <div class="t-author">
+        <div class="t-avatar">SL</div>
+        <div>
+          <div class="t-name">Sophie L.</div>
+          <div class="t-meta">Paris → Barcelone • Août 2024</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">« Génial pour un voyage d'affaires improvisé. Commandé le soir, livré le lendemain matin. Le trolley était nickel, comme neuf. »</p>
+      <div class="t-author">
+        <div class="t-avatar">MA</div>
+        <div>
+          <div class="t-name">Marc A.</div>
+          <div class="t-meta">Lyon → Amsterdam • Oct 2024</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">« J'ai loué pour toute la famille. 3 valises livrées sans accroc. Le prix est imbattable comparé à l'achat. BagAway, c'est malin ! »</p>
+      <div class="t-author">
+        <div class="t-avatar">CF</div>
+        <div>
+          <div class="t-name">Claire F.</div>
+          <div class="t-meta">Marseille → Réunion • Été 2024</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="t-stars">★★★★★</div>
+      <p class="t-text">« En tant que digital nomad, c'est la solution rêvée. Je loue selon mes destinations. Fini le stockage de valises chez moi ! »</p>
+      <div class="t-author">
+        <div class="t-avatar">AK</div>
+        <div>
+          <div class="t-name">Amélie K.</div>
+          <div class="t-meta">Remote traveler • Fidèle depuis 2023</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FAQ
+     ============================================================ -->
+<section class="section" id="faq" style="max-width: 780px; margin: 0 auto;">
+  <div class="reveal" style="text-align: center;">
+    <p class="section-tag" style="justify-content: center;">Questions fréquentes</p>
+    <h2 class="section-title" style="margin: 0 auto;">Tout ce que vous <em>voulez savoir</em></h2>
+  </div>
+
+  <div style="margin-top: 52px; display: flex; flex-direction: column; gap: 12px;">
+    <details class="faq-item reveal" style="background: var(--card); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden;">
+      <summary style="padding: 22px 24px; cursor: pointer; font-size: 0.95rem; font-weight: 500; display: flex; justify-content: space-between; align-items: center; list-style: none;">
+        Comment fonctionne la livraison ?
+        <span style="color: var(--gold); font-size: 1.2rem; flex-shrink: 0; margin-left: 12px;">+</span>
+      </summary>
+      <p style="padding: 0 24px 22px; font-size: 0.88rem; color: var(--muted); line-height: 1.75;">Nous livrons dans un créneau de 24h à l'adresse de votre choix (domicile, hôtel, bureau). La livraison est offerte dès 3 jours de location. Pour les villes non couvertes, un réseau de points relais est disponible.</p>
+    </details>
+
+    <details class="faq-item reveal reveal-delay-1" style="background: var(--card); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden;">
+      <summary style="padding: 22px 24px; cursor: pointer; font-size: 0.95rem; font-weight: 500; display: flex; justify-content: space-between; align-items: center; list-style: none;">
+        Les bagages sont-ils propres et désinfectés ?
+        <span style="color: var(--gold); font-size: 1.2rem; flex-shrink: 0; margin-left: 12px;">+</span>
+      </summary>
+      <p style="padding: 0 24px 22px; font-size: 0.88rem; color: var(--muted); line-height: 1.75;">Absolument. Chaque bagage suit un protocole de nettoyage en 5 étapes entre deux locations : désinfection, inspection, essuyage, contrôle qualité et conditionnement. Vous recevez un certificat de propreté avec votre commande.</p>
+    </details>
+
+    <details class="faq-item reveal reveal-delay-2" style="background: var(--card); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden;">
+      <summary style="padding: 22px 24px; cursor: pointer; font-size: 0.95rem; font-weight: 500; display: flex; justify-content: space-between; align-items: center; list-style: none;">
+        Que se passe-t-il en cas de casse ou de perte ?
+        <span style="color: var(--gold); font-size: 1.2rem; flex-shrink: 0; margin-left: 12px;">+</span>
+      </summary>
+      <p style="padding: 0 24px 22px; font-size: 0.88rem; color: var(--muted); line-height: 1.75;">Chaque location est assurée jusqu'à 500€. En cas de dommage, signalez-le dans les 24h via l'application. Notre équipe évalue la situation et vous propose une solution dans les 48h (remplacement ou remboursement).</p>
+    </details>
+
+    <details class="faq-item reveal reveal-delay-3" style="background: var(--card); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden;">
+      <summary style="padding: 22px 24px; cursor: pointer; font-size: 0.95rem; font-weight: 500; display: flex; justify-content: space-between; align-items: center; list-style: none;">
+        Puis-je modifier ou annuler ma réservation ?
+        <span style="color: var(--gold); font-size: 1.2rem; flex-shrink: 0; margin-left: 12px;">+</span>
+      </summary>
+      <p style="padding: 0 24px 22px; font-size: 0.88rem; color: var(--muted); line-height: 1.75;">Oui, jusqu'à 48h avant la date de livraison sans frais. Passé ce délai, un avoir de 50% est appliqué. Vous pouvez tout gérer depuis votre espace personnel ou en contactant notre support disponible 7j/7.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============================================================
+     CTA
+     ============================================================ -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <div class="cta-text">
+      <h2 class="cta-title">Prêt à voyager <em>sans les contraintes</em> du bagage ?</h2>
+      <p class="cta-desc">Rejoignez 15 000 voyageurs qui font confiance à BagAway pour chaque escapade. Première location avec -15% : code BIENVENUE.</p>
+    </div>
+    <div class="cta-actions">
+      <button class="btn-large gold">Réserver maintenant</button>
+      <button class="btn-large outline">Voir le catalogue</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">BagAway</div>
+      <p class="footer-tagline">La location de bagages premium qui libère les voyageurs des contraintes du quotidien.</p>
+    </div>
+    <div>
+      <p class="footer-col-title">Services</p>
+      <ul class="footer-links">
+        <li><a href="#">Location valise</a></li>
+        <li><a href="#">Location sac</a></li>
+        <li><a href="#">Pack voyage</a></li>
+        <li><a href="#">Offre entreprise</a></li>
+        <li><a href="#">Partenaires hôtels</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-col-title">Aide</p>
+      <ul class="footer-links">
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">Livraisons</a></li>
+        <li><a href="#">Assurance</a></li>
+        <li><a href="#">Annulation</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-col-title">Entreprise</p>
+      <ul class="footer-links">
+        <li><a href="#">À propos</a></li>
+        <li><a href="#">Engagement vert</a></li>
+        <li><a href="#">Presse</a></li>
+        <li><a href="#">Carrières</a></li>
+        <li><a href="#">CGV</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 BagAway · Tous droits réservés</p>
+    <div class="footer-socials">
+      <a href="#" class="social-link">𝕏</a>
+      <a href="#" class="social-link">in</a>
+      <a href="#" class="social-link">▶</a>
+      <a href="#" class="social-link">📷</a>
+    </div>
+    <p>Paris, France 🇫🇷</p>
+  </div>
+</footer>
+
+</div><!-- /#main-page -->
+
+<!-- ============================================================
+     PAGE PRODUIT DÉTAILLÉE
+     ============================================================ -->
+<div id="product-page">
+
+  <!-- La nav est partagée (toujours visible) -->
+
+  <!-- Fil d'ariane -->
+  <div class="product-page-nav" id="pp-breadcrumb">
+    <a href="#" onclick="goBack(); return false;">← Retour au catalogue</a>
+    <span>/</span>
+    <span id="pp-breadcrumb-name">Produit</span>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="product-page-container">
+
+    <!-- Galerie -->
+    <div class="pp-gallery">
+      <div class="pp-main-img" id="pp-main-emoji">
+        🧳
+      </div>
+      <div class="pp-thumbnails">
+        <div class="pp-thumb active" data-emoji="🧳" onclick="setThumb(this)">🧳</div>
+        <div class="pp-thumb" data-emoji="🔒" onclick="setThumb(this)">🔒</div>
+        <div class="pp-thumb" data-emoji="✈️" onclick="setThumb(this)">✈️</div>
+        <div class="pp-thumb" data-emoji="🏷️" onclick="setThumb(this)">🏷️</div>
+      </div>
+    </div>
+
+    <!-- Informations produit -->
+    <div class="pp-info">
+      <div class="pp-badge-row">
+        <span class="pp-badge gold" id="pp-badge">⭐ Bestseller</span>
+        <span class="pp-badge green">✓ Disponible</span>
+        <span class="pp-badge outline">✈️ Conforme IATA</span>
+      </div>
+
+      <h1 class="pp-name" id="pp-name">Valise Cabine Élite</h1>
+
+      <div class="pp-rating-row">
+        <span class="pp-stars">★★★★★</span>
+        <span class="pp-rating-num">4.9</span>
+        <a href="#pp-reviews" class="pp-reviews">142 avis clients</a>
+      </div>
+
+      <!-- Prix dynamique -->
+      <div class="pp-price-block">
+        <div class="pp-price-label">Tarif de location</div>
+        <div class="pp-price-main">
+          <span class="pp-price-num" id="pp-price">7€</span>
+          <span class="pp-price-per">/ jour</span>
+        </div>
+        <div class="pp-price-total" id="pp-total">Pour 3 jours : <strong style="color:var(--gold)">20€</strong> au total</div>
+        <span class="pp-price-highlight">💳 Paiement à la livraison possible</span>
+      </div>
+
+      <!-- Durée de location -->
+      <div class="pp-duration-section">
+        <p class="pp-option-label">Durée de location</p>
+        <div class="pp-duration-grid">
+          <button class="pp-dur-btn" onclick="selectDuration(this, 1)">1 jour<small>tarif plein</small></button>
+          <button class="pp-dur-btn active" onclick="selectDuration(this, 3)">3 jours<small>-5%</small></button>
+          <button class="pp-dur-btn" onclick="selectDuration(this, 7)">1 semaine<small>-10%</small></button>
+          <button class="pp-dur-btn" onclick="selectDuration(this, 30)">1 mois<small>-20%</small></button>
+        </div>
+      </div>
+
+      <!-- Dates -->
+      <div class="pp-dates-row">
+        <div class="pp-date-field">
+          <label class="pp-date-label">📅 Date de début</label>
+          <input type="date" class="pp-date-input" id="pp-date-start" onchange="updateTotal()">
+        </div>
+        <div class="pp-date-field">
+          <label class="pp-date-label">📅 Date de retour</label>
+          <input type="date" class="pp-date-input" id="pp-date-end" onchange="updateTotal()">
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="pp-cta-stack">
+        <button class="pp-btn-primary" onclick="confirmReservation()">
+          🧳 Réserver maintenant
+        </button>
+        <button class="pp-btn-secondary" onclick="addToWishlist()">
+          ♡ Ajouter à mes favoris
+        </button>
+      </div>
+
+      <!-- Garanties -->
+      <div class="pp-guarantees">
+        <div class="pp-guarantee">
+          <span class="pp-guarantee-icon">🚀</span>
+          <div class="pp-guarantee-text">
+            <strong>Livraison express 4h</strong>
+            Commandez avant 14h, recevez aujourd'hui
+          </div>
+        </div>
+        <div class="pp-guarantee">
+          <span class="pp-guarantee-icon">🛡️</span>
+          <div class="pp-guarantee-text">
+            <strong>Assurance incluse</strong>
+            Couverture jusqu'à 500€
+          </div>
+        </div>
+        <div class="pp-guarantee">
+          <span class="pp-guarantee-icon">♻️</span>
+          <div class="pp-guarantee-text">
+            <strong>Nettoyé & désinfecté</strong>
+            Protocole 5 étapes certifié
+          </div>
+        </div>
+        <div class="pp-guarantee">
+          <span class="pp-guarantee-icon">↩️</span>
+          <div class="pp-guarantee-text">
+            <strong>Retour gratuit</strong>
+            On vient le récupérer chez vous
+          </div>
+        </div>
+      </div>
+
+      <!-- Specs -->
+      <div class="pp-specs">
+        <h3 class="pp-specs-title">Caractéristiques</h3>
+        <div class="pp-spec-row">
+          <span class="pp-spec-key">Capacité</span>
+          <span class="pp-spec-val" id="pp-spec-capacity">20 litres</span>
+        </div>
+        <div class="pp-spec-row">
+          <span class="pp-spec-key">Poids</span>
+          <span class="pp-spec-val" id="pp-spec-weight">2.1 kg</span>
+        </div>
+        <div class="pp-spec-row">
+          <span class="pp-spec-key">Dimensions</span>
+          <span class="pp-spec-val" id="pp-spec-dims">55 × 35 × 20 cm</span>
+        </div>
+        <div class="pp-spec-row">
+          <span class="pp-spec-key">Matière</span>
+          <span class="pp-spec-val" id="pp-spec-material">Polycarbonate renforcé</span>
+        </div>
+        <div class="pp-spec-row">
+          <span class="pp-spec-key">Roues</span>
+          <span class="pp-spec-val">4 roues 360° silencieuses</span>
+        </div>
+        <div class="pp-spec-row">
+          <span class="pp-spec-key">Serrure</span>
+          <span class="pp-spec-val" id="pp-spec-lock">TSA combinaison</span>
+        </div>
+        <div class="pp-spec-row">
+          <span class="pp-spec-key">Conformité</span>
+          <span class="pp-spec-val">100% compagnies aériennes</span>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="pp-description">
+        <p class="pp-desc-text" id="pp-desc">
+          La <strong style="color:var(--text)">Valise Cabine Élite</strong> est notre modèle le plus populaire, plébiscité par les voyageurs fréquents. Sa coque en polycarbonate ultra-résistant protège vos affaires en toutes circonstances, tout en restant légère pour maximiser votre quota bagages.
+        </p>
+        <p class="pp-desc-text">
+          Chaque bagage BagAway est soumis à un protocole de nettoyage rigoureux en 5 étapes avant chaque location : désinfection UV, nettoyage intérieur, inspection des roulettes, contrôle de la serrure et conditionnement stérile. Vous recevez un <strong style="color:var(--text)">certificat de propreté</strong> avec votre commande.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section Avis -->
+  <div class="pp-reviews-section" id="pp-reviews">
+    <div class="pp-reviews-header">
+      <h2 class="pp-reviews-title">Avis clients</h2>
+      <div class="pp-reviews-avg">
+        <div class="pp-reviews-avg-num">4.9</div>
+        <div style="color:var(--gold)">★★★★★</div>
+        <div style="font-size:0.78rem; color:var(--muted); margin-top:4px">142 avis vérifiés</div>
+      </div>
+    </div>
+    <div class="pp-reviews-grid">
+      <div class="pp-review-card">
+        <div class="pp-review-stars">★★★★★</div>
+        <p class="pp-review-text">« Parfaite pour mon week-end à Amsterdam ! Légère, solide, les roulettes glissent sans bruit. Je commande déjà pour mon prochain voyage. »</p>
+        <div class="pp-review-author">
+          <div class="pp-review-avatar">SL</div>
+          <div>
+            <div class="pp-review-name">Sophie L.</div>
+            <div class="pp-review-date">Il y a 3 jours · Paris</div>
+          </div>
+        </div>
+      </div>
+      <div class="pp-review-card">
+        <div class="pp-review-stars">★★★★★</div>
+        <p class="pp-review-text">« Exactement aux dimensions cabine Easyjet. La livraison à l'hôtel s'est faite dans les délais, le bagage était impeccable. Top service ! »</p>
+        <div class="pp-review-author">
+          <div class="pp-review-avatar">MA</div>
+          <div>
+            <div class="pp-review-name">Marc A.</div>
+            <div class="pp-review-date">Il y a 1 semaine · Lyon</div>
+          </div>
+        </div>
+      </div>
+      <div class="pp-review-card">
+        <div class="pp-review-stars">★★★★☆</div>
+        <p class="pp-review-text">« Très bon rapport qualité/prix. La valise est en parfait état. Petit bémol : il m'a fallu 10 min pour trouver la serrure TSA, mais ça vaut le coup. »</p>
+        <div class="pp-review-author">
+          <div class="pp-review-avatar">CF</div>
+          <div>
+            <div class="pp-review-name">Claire F.</div>
+            <div class="pp-review-date">Il y a 2 semaines · Bordeaux</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Produits similaires -->
+  <div class="pp-similar-section">
+    <h2 class="pp-similar-title">Vous aimerez aussi</h2>
+    <div class="products-grid" style="margin-top: 0;">
+      <div class="product-card" onclick="openProduct('trolley')">
+        <div class="product-img" style="padding:0; overflow:hidden; background:#f0f0f0;">
+          <img src="assets/images/bagaway-02-1222c96d65.jpg" alt="Trolley Business Pro" style="width:100%;height:100%;object-fit:cover;">
+          <div class="product-badge" style="background: #e8c97e;">Business</div>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">Trolley Business Pro</h3>
+          <div class="product-specs">
+            <span class="spec">📦 38 litres</span>
+            <span class="spec">⚖️ 3.2 kg</span>
+            <span class="spec">🔒 TSA Lock</span>
+          </div>
+          <div class="product-footer">
+            <div class="product-price">
+              <div class="price-num">10€</div>
+              <div class="price-unit">/ jour</div>
+            </div>
+            <button class="btn-add" onclick="event.stopPropagation(); openProduct('trolley')">Réserver</button>
+          </div>
+        </div>
+      </div>
+      <div class="product-card" onclick="openProduct('backpack')">
+        <div class="product-img" style="padding:0; overflow:hidden; background:#f5f5f5;">
+          <img src="assets/images/bagaway-03-7b8d6a2fdd.jpg" alt="Sac à dos Explorer" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">Sac à dos Explorer</h3>
+          <div class="product-specs">
+            <span class="spec">📦 30 litres</span>
+            <span class="spec">⚖️ 1.4 kg</span>
+            <span class="spec">💧 Waterproof</span>
+          </div>
+          <div class="product-footer">
+            <div class="product-price">
+              <div class="price-num">5€</div>
+              <div class="price-unit">/ jour</div>
+            </div>
+            <button class="btn-add" onclick="event.stopPropagation(); openProduct('backpack')">Réserver</button>
+          </div>
+        </div>
+      </div>
+      <div class="product-card" onclick="openProduct('large')">
+        <div class="product-img" style="padding:0; overflow:hidden; background:#fff9f0;">
+          <img src="assets/images/bagaway-04-aacfa371ef.jpg" alt="Grande Valise Family" style="width:100%;height:100%;object-fit:contain;padding:12px;">
+          <div class="product-badge" style="background: #b8a0d4; color: #111;">Nouveau</div>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">Grande Valise Family</h3>
+          <div class="product-specs">
+            <span class="spec">📦 75 litres</span>
+            <span class="spec">⚖️ 4.1 kg</span>
+            <span class="spec">🎨 4 coloris</span>
+          </div>
+          <div class="product-footer">
+            <div class="product-price">
+              <div class="price-num">13€</div>
+              <div class="price-unit">/ jour</div>
+            </div>
+            <button class="btn-add" onclick="event.stopPropagation(); openProduct('large')">Réserver</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#product-page -->
+
+<!-- ============================================================
+     PAGE PAIEMENT (checkout)
+     ============================================================ -->
+<div id="payment-page">
+
+  <div class="product-page-nav" id="pay-breadcrumb">
+    <a href="#" onclick="backToProduct(); return false;">← Retour à la fiche produit</a>
+    <span>/</span>
+    <span>Paiement sécurisé</span>
+  </div>
+
+  <!-- Vue paiement -->
+  <div class="payment-container" id="payment-form-view">
+
+    <div class="payment-form-col">
+      <h1 class="payment-title">Finaliser votre réservation</h1>
+      <p class="payment-subtitle">🔒 Paiement 100% sécurisé · Annulation gratuite jusqu'à 48h avant la livraison</p>
+
+      <!-- Coordonnées -->
+      <div class="pay-section">
+        <h3 class="pay-section-title">1 · Vos coordonnées</h3>
+        <div class="pay-field-row">
+          <div class="pay-field">
+            <label for="pay-firstname">Prénom</label>
+            <input class="modal-input" type="text" id="pay-firstname" placeholder="Marie" autocomplete="given-name">
+          </div>
+          <div class="pay-field">
+            <label for="pay-lastname">Nom</label>
+            <input class="modal-input" type="text" id="pay-lastname" placeholder="Dupont" autocomplete="family-name">
+          </div>
+        </div>
+        <div class="pay-field">
+          <label for="pay-email">Adresse e-mail</label>
+          <div class="pay-email-wrap">
+            <input class="modal-input" type="email" id="pay-email" placeholder="vous@email.com" autocomplete="email" oninput="onEmailChange()">
+            <button type="button" class="pay-email-verify-btn" id="pay-email-verify-btn" onclick="sendVerificationCode()">Vérifier</button>
+          </div>
+          <div class="pay-email-status" id="pay-email-status"></div>
+
+          <div class="pay-email-code-panel" id="pay-email-code-panel" style="display:none">
+            <p class="pay-email-code-note">Un code à 6 chiffres a été envoyé à <strong id="pay-email-code-target"></strong>.</p>
+            <div class="pay-email-code-row">
+              <input class="modal-input pay-email-code-input" type="text" id="pay-email-code" placeholder="• • • • • •" maxlength="6" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmEmailCode();}">
+              <button type="button" class="pay-promo-btn" onclick="confirmEmailCode()">Confirmer</button>
+            </div>
+            <a href="#" class="pay-email-resend" onclick="sendVerificationCode(); return false;">Renvoyer le code</a>
+          </div>
+        </div>
+        <div class="pay-field">
+          <label for="pay-address">Adresse de livraison</label>
+          <input class="modal-input" type="text" id="pay-address" placeholder="12 rue de la Paix, 75002 Paris" autocomplete="street-address">
+        </div>
+      </div>
+
+      <!-- Mode de paiement -->
+      <div class="pay-section">
+        <h3 class="pay-section-title">2 · Mode de paiement</h3>
+        <div class="pay-methods-grid">
+          <button type="button" class="pay-method active" id="method-card" onclick="selectPaymentMethod('card')">
+            <span class="pay-method-icon">💳</span><span>Carte bancaire</span>
+          </button>
+          <button type="button" class="pay-method" id="method-paypal" onclick="selectPaymentMethod('paypal')">
+            <span class="pay-method-icon">🅿️</span><span>PayPal</span>
+          </button>
+          <button type="button" class="pay-method" id="method-applepay" onclick="selectPaymentMethod('applepay')">
+            <span class="pay-method-icon">🍎</span><span>Apple Pay</span>
+          </button>
+          <button type="button" class="pay-method" id="method-gpay" onclick="selectPaymentMethod('gpay')">
+            <span class="pay-method-icon">G</span><span>Google Pay</span>
+          </button>
+          <button type="button" class="pay-method" id="method-transfer" onclick="selectPaymentMethod('transfer')">
+            <span class="pay-method-icon">🏦</span><span>Virement</span>
+          </button>
+        </div>
+
+        <!-- Panneau carte bancaire -->
+        <div class="pay-method-panel" id="panel-card">
+          <div class="pay-field">
+            <label for="pay-card-number">Numéro de carte</label>
+            <div class="pay-card-input-wrap">
+              <input class="modal-input" type="text" id="pay-card-number" placeholder="1234 5678 9012 3456" maxlength="19" inputmode="numeric" oninput="formatCardNumber(this)">
+              <span class="pay-card-brand" id="pay-card-brand">💳</span>
+            </div>
+          </div>
+          <div class="pay-field-row">
+            <div class="pay-field">
+              <label for="pay-card-expiry">Date d'expiration</label>
+              <input class="modal-input" type="text" id="pay-card-expiry" placeholder="MM/AA" maxlength="5" inputmode="numeric" oninput="formatExpiry(this)">
+            </div>
+            <div class="pay-field">
+              <label for="pay-card-cvc">CVC</label>
+              <input class="modal-input" type="text" id="pay-card-cvc" placeholder="123" maxlength="3" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')">
+            </div>
+          </div>
+          <div class="pay-field">
+            <label for="pay-card-name">Nom sur la carte</label>
+            <input class="modal-input" type="text" id="pay-card-name" placeholder="MARIE DUPONT" autocomplete="cc-name">
+          </div>
+        </div>
+
+        <!-- Panneau PayPal -->
+        <div class="pay-method-panel" id="panel-paypal" style="display:none">
+          <p class="pay-method-note">Vous serez redirigé(e) vers <strong>PayPal</strong> pour vous connecter et confirmer le paiement en toute sécurité.</p>
+        </div>
+
+        <!-- Panneau Apple Pay -->
+        <div class="pay-method-panel" id="panel-applepay" style="display:none">
+          <p class="pay-method-note">Confirmez votre paiement avec <strong>Face ID / Touch ID</strong> via Apple Pay.</p>
+        </div>
+
+        <!-- Panneau Google Pay -->
+        <div class="pay-method-panel" id="panel-gpay" style="display:none">
+          <p class="pay-method-note">Confirmez votre paiement en un clic avec <strong>Google Pay</strong>.</p>
+        </div>
+
+        <!-- Panneau Virement -->
+        <div class="pay-method-panel" id="panel-transfer" style="display:none">
+          <p class="pay-method-note">Un <strong>RIB</strong> vous sera envoyé par e-mail. Votre réservation sera confirmée à réception du virement (1 à 2 jours ouvrés).</p>
+        </div>
+      </div>
+
+      <label class="pay-cgv-row">
+        <input type="checkbox" class="modal-check" id="pay-cgv">
+        <span>J'accepte les <a href="#">Conditions Générales de Vente</a> et la <a href="#">politique d'annulation</a> de BagAway.</span>
+      </label>
+
+      <button class="pp-btn-primary" id="pay-submit-btn" onclick="processPayment()">
+        🔒 Payer <span id="pay-submit-amount">20€</span> en toute sécurité
+      </button>
+
+      <div class="pay-security-row">
+        <span>🔒 Connexion cryptée SSL</span>
+        <span>💳 Visa</span>
+        <span>💳 Mastercard</span>
+        <span>🅿️ PayPal</span>
+      </div>
+    </div>
+
+    <!-- Récapitulatif de commande -->
+    <div class="payment-summary-col">
+      <div class="pay-summary-card">
+        <h3>Récapitulatif</h3>
+        <div class="pay-summary-product">
+          <div class="pay-summary-img" id="pay-summary-emoji">🧳</div>
+          <div>
+            <div class="pay-summary-name" id="pay-summary-name">Valise Cabine Élite</div>
+            <div class="pay-summary-dates" id="pay-summary-dates">3 jours de location</div>
+          </div>
+        </div>
+        <div class="pay-summary-rows">
+          <div class="pay-summary-row"><span id="pay-summary-sublabel">Sous-total (3 jours)</span><span id="pay-summary-subtotal">21€</span></div>
+          <div class="pay-summary-row"><span>Réduction durée</span><span id="pay-summary-discount" style="color:#50c878">-1€</span></div>
+          <div class="pay-summary-row" id="pay-summary-promo-row" style="display:none"><span id="pay-summary-promo-label">Code promo</span><span id="pay-summary-promo-amount" style="color:#50c878">-0€</span></div>
+          <div class="pay-summary-row"><span>Assurance incluse</span><span>0€</span></div>
+          <div class="pay-summary-row"><span>Livraison</span><span style="color:#50c878">Offerte</span></div>
+        </div>
+
+        <!-- Code promo -->
+        <div class="pay-promo-block">
+          <div class="pay-promo-row">
+            <input class="modal-input pay-promo-input" type="text" id="pay-promo-code" placeholder="Code promo" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();applyPromoCode();}">
+            <button type="button" class="pay-promo-btn" id="pay-promo-btn" onclick="applyPromoCode()">Appliquer</button>
+          </div>
+          <div class="pay-promo-msg" id="pay-promo-msg"></div>
+        </div>
+
+        <div class="pay-summary-total-row">
+          <span>Total à payer</span>
+          <span id="pay-summary-total">20€</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vue confirmation (affichée après paiement) -->
+  <div class="payment-confirm" id="payment-confirm">
+    <div class="payment-confirm-card">
+      <div class="payment-confirm-icon">✅</div>
+      <h2>Merci, votre réservation est confirmée !</h2>
+      <p>Un e-mail de confirmation a été envoyé à <strong id="confirm-email">vous@email.com</strong>. Vous recevrez le détail de la livraison sous 24h.</p>
+      <div class="payment-confirm-ref">N° de commande : <strong id="confirm-order-num">#BA-000000</strong></div>
+      <button class="pp-btn-primary" onclick="returnToHome()">Retour à l'accueil</button>
+    </div>
+  </div>
+
+</div><!-- /#payment-page -->
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+
+
+
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>speut tu améliorer les boutons histoire que lorqu'on clique sur cse propositions, cela nous affime cette proposition 
